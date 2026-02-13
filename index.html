@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Steel Calc Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-button-color: #248bed;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-text-color: #000000;
+        }
+        body {
+            font-family: -apple-system, sans-serif;
+            background-color: var(--tg-theme-bg-color);
+            color: var(--tg-theme-text-color);
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .container { width: 100%; max-width: 400px; }
+        input {
+            width: 100%; padding: 15px; margin: 10px 0;
+            border: 1px solid #ccc; border-radius: 12px;
+            font-size: 17px; box-sizing: border-box;
+            background: #f1f1f1;
+        }
+        button {
+            width: 100%; padding: 16px; margin-top: 15px;
+            background-color: var(--tg-theme-button-color);
+            color: var(--tg-theme-button-text-color);
+            border: none; border-radius: 12px;
+            font-size: 18px; font-weight: bold; cursor: pointer;
+        }
+        .result-box {
+            margin-top: 25px; padding: 15px;
+            background: rgba(128, 128, 128, 0.1);
+            border-radius: 12px; width: 100%; box-sizing: border-box;
+            display: none;
+        }
+        .res-row { display: flex; justify-content: space-between; margin: 10px 0; }
+        .val { font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="text-align: center;">Вес стального прутка</h2>
+    
+    <label>Диаметр (мм)</label>
+    <input type="number" id="d" placeholder="Напр: 12" inputmode="decimal">
+
+    <label>Длина (мм)</label>
+    <input type="number" id="l" placeholder="Напр: 1000" inputmode="decimal">
+
+    <label>Количество (шт)</label>
+    <input type="number" id="n" value="1" inputmode="numeric">
+
+    <button id="mainBtn">Рассчитать вес</button>
+
+    <div class="result-box" id="resBlock">
+        <div class="res-row"><span>Один пруток:</span> <span class="val"><span id="r1">0</span> кг</span></div>
+        <div class="res-row"><span>Общий вес:</span> <span class="val"><span id="rn">0</span> кг</span></div>
+    </div>
+</div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Развернуть на весь экран
+
+    const btn = document.getElementById('mainBtn');
+    
+    btn.onclick = function() {
+        const d = parseFloat(document.getElementById('d').value.replace(',', '.'));
+        const l = parseFloat(document.getElementById('l').value.replace(',', '.'));
+        const n = parseFloat(document.getElementById('n').value.replace(',', '.'));
+
+        if (d > 0 && l > 0 && n > 0) {
+            // Плотность стали 7850 кг/м3
+            const radiusM = (d / 2) / 1000;
+            const lengthM = l / 1000;
+            const weightOne = Math.PI * Math.pow(radiusM, 2) * lengthM * 7850;
+            
+            document.getElementById('r1').innerText = weightOne.toFixed(3);
+            document.getElementById('rn').innerText = (weightOne * n).toFixed(3);
+            document.getElementById('resBlock').style.display = 'block';
+            
+            // Легкая вибрация при расчете (фишка TG)
+            tg.HapticFeedback.impactOccurred('medium');
+        } else {
+            tg.showAlert("Пожалуйста, заполните все поля корректно");
+        }
+    };
+</script>
+
+</body>
+</html>
