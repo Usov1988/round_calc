@@ -30,11 +30,9 @@
 
         h2 { color: #2c2c2e; text-transform: uppercase; font-size: 16px; margin-bottom: 20px; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
 
-        /* Экраны */
         .screen { display: none; flex-direction: column; }
         .screen.active { display: flex; }
 
-        /* Кнопки меню */
         .menu-btn {
             width: 100%; padding: 20px 10px; margin: 10px 0;
             background: linear-gradient(to bottom, #4a4a4a, #2c2c2e);
@@ -46,7 +44,6 @@
         }
         .menu-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; }
 
-        /* Поля ввода */
         .input-group { margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
         label { font-weight: bold; color: #333; font-size: 11px; text-transform: uppercase; text-align: left; flex: 1; }
         input { 
@@ -54,7 +51,6 @@
             padding: 8px; font-size: 18px; font-weight: bold; text-align: center;
         }
 
-        /* Синяя кнопка расчета */
         .calc-btn {
             width: 100%; padding: 15px; margin-top: 15px;
             background: linear-gradient(to bottom, #3a7bd5, #00d2ff);
@@ -77,7 +73,6 @@
     
     <div id="menuScreen" class="screen active">
         <h2>Выберите тип расчета</h2>
-        
         <button class="menu-btn" onclick="showScreen('weightCalc')">Расчет веса<br><small>(по количеству)</small></button>
         <button class="menu-btn" onclick="showScreen('countCalc')">Расчет количества<br><small>(по общему весу)</small></button>
     </div>
@@ -86,15 +81,15 @@
         <h2>Расчет веса</h2>
         <div class="input-group">
             <label>Диаметр (мм)</label>
-            <input type="number" id="w_d" value="12" inputmode="decimal">
+            <input type="number" id="w_d" placeholder="0" inputmode="decimal">
         </div>
         <div class="input-group">
             <label>Длина (мм)</label>
-            <input type="number" id="w_l" value="1000" inputmode="decimal">
+            <input type="number" id="w_l" placeholder="0" inputmode="decimal">
         </div>
         <div class="input-group">
             <label>Кол-во (шт)</label>
-            <input type="number" id="w_n" value="1" inputmode="numeric">
+            <input type="number" id="w_n" placeholder="0" inputmode="numeric">
         </div>
         <button class="calc-btn" onclick="calcWeight()">Посчитать</button>
         <div class="results">
@@ -108,15 +103,15 @@
         <h2>Расчет штук</h2>
         <div class="input-group">
             <label>Диаметр (мм)</label>
-            <input type="number" id="c_d" value="12" inputmode="decimal">
+            <input type="number" id="c_d" placeholder="0" inputmode="decimal">
         </div>
         <div class="input-group">
             <label>Длина (мм)</label>
-            <input type="number" id="c_l" value="1000" inputmode="decimal">
+            <input type="number" id="c_l" placeholder="0" inputmode="decimal">
         </div>
         <div class="input-group">
             <label>Общий вес (кг)</label>
-            <input type="number" id="c_w" value="100" inputmode="decimal">
+            <input type="number" id="c_w" placeholder="0" inputmode="decimal">
         </div>
         <button class="calc-btn" onclick="calcCount()">Посчитать</button>
         <div class="results">
@@ -137,7 +132,7 @@
         document.getElementById(id).classList.add('active');
     }
 
-    const DENSITY = 7850; // Сталь кг/м3
+    const DENSITY = 7850; 
 
     function getSingleWeight(d, l) {
         return Math.PI * Math.pow((d/2000), 2) * (l/1000) * DENSITY;
@@ -151,7 +146,9 @@
             const w1 = getSingleWeight(d, l);
             document.getElementById('w_res1').innerText = w1.toFixed(3);
             document.getElementById('w_resN').innerText = (w1 * n).toFixed(3);
-            tg.HapticFeedback.impactOccurred('medium');
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        } else {
+            alert("Заполните все поля значениями больше 0");
         }
     }
 
@@ -164,7 +161,9 @@
             const count = targetW / w1;
             document.getElementById('c_res1').innerText = w1.toFixed(3);
             document.getElementById('c_resN').innerText = Math.round(count);
-            tg.HapticFeedback.impactOccurred('medium');
+            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        } else {
+            alert("Заполните все поля значениями больше 0");
         }
     }
 </script>
