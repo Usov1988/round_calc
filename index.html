@@ -3,96 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Steel Calc Mini App</title>
+    <title>Steel Pro Multi-Calc</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --tg-theme-bg-color: #ffffff;
-            --tg-theme-button-color: #248bed;
-            --tg-theme-button-text-color: #ffffff;
-            --tg-theme-text-color: #000000;
-        }
         body {
-            font-family: -apple-system, sans-serif;
-            background-color: var(--tg-theme-bg-color);
-            color: var(--tg-theme-text-color);
-            margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
+            background: #1a1a1c;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0;
+            font-family: 'Segoe UI', sans-serif;
         }
-        .container { width: 100%; max-width: 400px; }
-        input {
-            width: 100%; padding: 15px; margin: 10px 0;
-            border: 1px solid #ccc; border-radius: 12px;
-            font-size: 17px; box-sizing: border-box;
-            background: #f1f1f1;
+
+        .app-container {
+            background: linear-gradient(135deg, #757f9a 0%, #d7dde8 50%, #757f9a 100%);
+            border: 8px solid #2c2c2e;
+            border-radius: 25px; padding: 25px;
+            width: 320px; min-height: 400px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 20px 40px rgba(0,0,0,0.8);
+            position: relative; text-align: center;
         }
-        button {
-            width: 100%; padding: 16px; margin-top: 15px;
-            background-color: var(--tg-theme-button-color);
-            color: var(--tg-theme-button-text-color);
-            border: none; border-radius: 12px;
-            font-size: 18px; font-weight: bold; cursor: pointer;
+
+        .app-container::before {
+            content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url('https://www.transparenttextures.com/patterns/brushed-alum.png');
+            opacity: 0.2; pointer-events: none; border-radius: 17px;
         }
-        .result-box {
-            margin-top: 25px; padding: 15px;
-            background: rgba(128, 128, 128, 0.1);
-            border-radius: 12px; width: 100%; box-sizing: border-box;
-            display: none;
+
+        h2 { color: #2c2c2e; text-transform: uppercase; font-size: 16px; margin-bottom: 20px; text-shadow: 1px 1px 0px rgba(255,255,255,0.5); }
+
+        /* Экраны */
+        .screen { display: none; flex-direction: column; }
+        .screen.active { display: flex; }
+
+        /* Кнопки меню */
+        .menu-btn {
+            width: 100%; padding: 20px 10px; margin: 10px 0;
+            background: linear-gradient(to bottom, #4a4a4a, #2c2c2e);
+            border: 1px solid #111; border-radius: 12px;
+            color: #eee; font-weight: bold; font-size: 14px;
+            text-transform: uppercase; cursor: pointer;
+            box-shadow: 0 4px 0 #000, 0 6px 10px rgba(0,0,0,0.4);
+            transition: 0.1s;
         }
-        .res-row { display: flex; justify-content: space-between; margin: 10px 0; }
-        .val { font-weight: bold; }
+        .menu-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #000; }
+
+        /* Поля ввода */
+        .input-group { margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        label { font-weight: bold; color: #333; font-size: 11px; text-transform: uppercase; text-align: left; flex: 1; }
+        input { 
+            width: 130px; background: #e0e0e0; border: 2px solid #999; border-radius: 6px;
+            padding: 8px; font-size: 18px; font-weight: bold; text-align: center;
+        }
+
+        /* Синяя кнопка расчета */
+        .calc-btn {
+            width: 100%; padding: 15px; margin-top: 15px;
+            background: linear-gradient(to bottom, #3a7bd5, #00d2ff);
+            border: 1px solid #1a5bb8; border-radius: 10px;
+            color: white; font-size: 16px; font-weight: bold; text-transform: uppercase;
+            box-shadow: 0 4px 0 #154a96, 0 6px 8px rgba(0,0,0,0.3);
+        }
+        .calc-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #154a96; }
+
+        .back-btn { margin-top: 20px; background: none; border: none; color: #444; text-decoration: underline; font-size: 13px; cursor: pointer; }
+
+        .results { margin-top: 20px; background: rgba(0,0,0,0.07); border-radius: 10px; padding: 12px; text-align: left; }
+        .res-line { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .res-line span:last-child { font-weight: 900; color: #000; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2 style="text-align: center;">Вес стального прутка</h2>
+<div class="app-container">
     
-    <label>Диаметр (мм)</label>
-    <input type="number" id="d" placeholder="Напр: 12" inputmode="decimal">
-
-    <label>Длина (мм)</label>
-    <input type="number" id="l" placeholder="Напр: 1000" inputmode="decimal">
-
-    <label>Количество (шт)</label>
-    <input type="number" id="n" value="1" inputmode="numeric">
-
-    <button id="mainBtn">Рассчитать вес</button>
-
-    <div class="result-box" id="resBlock">
-        <div class="res-row"><span>Один пруток:</span> <span class="val"><span id="r1">0</span> кг</span></div>
-        <div class="res-row"><span>Общий вес:</span> <span class="val"><span id="rn">0</span> кг</span></div>
+    <div id="menuScreen" class="screen active">
+        <h2>Выберите тип расчета</h2>
+        
+        <button class="menu-btn" onclick="showScreen('weightCalc')">Расчет веса<br><small>(по количеству)</small></button>
+        <button class="menu-btn" onclick="showScreen('countCalc')">Расчет количества<br><small>(по общему весу)</small></button>
     </div>
+
+    <div id="weightCalc" class="screen">
+        <h2>Расчет веса</h2>
+        <div class="input-group">
+            <label>Диаметр (мм)</label>
+            <input type="number" id="w_d" value="12" inputmode="decimal">
+        </div>
+        <div class="input-group">
+            <label>Длина (мм)</label>
+            <input type="number" id="w_l" value="1000" inputmode="decimal">
+        </div>
+        <div class="input-group">
+            <label>Кол-во (шт)</label>
+            <input type="number" id="w_n" value="1" inputmode="numeric">
+        </div>
+        <button class="calc-btn" onclick="calcWeight()">Посчитать</button>
+        <div class="results">
+            <div class="res-line"><span>1 ШТ:</span> <span><span id="w_res1">0.000</span> КГ</span></div>
+            <div class="res-line"><span>ИТОГО:</span> <span><span id="w_resN">0.000</span> КГ</span></div>
+        </div>
+        <button class="back-btn" onclick="showScreen('menuScreen')">← Назад в меню</button>
+    </div>
+
+    <div id="countCalc" class="screen">
+        <h2>Расчет штук</h2>
+        <div class="input-group">
+            <label>Диаметр (мм)</label>
+            <input type="number" id="c_d" value="12" inputmode="decimal">
+        </div>
+        <div class="input-group">
+            <label>Длина (мм)</label>
+            <input type="number" id="c_l" value="1000" inputmode="decimal">
+        </div>
+        <div class="input-group">
+            <label>Общий вес (кг)</label>
+            <input type="number" id="c_w" value="100" inputmode="decimal">
+        </div>
+        <button class="calc-btn" onclick="calcCount()">Посчитать</button>
+        <div class="results">
+            <div class="res-line"><span>ШТУК:</span> <span><span id="c_resN">0</span> ШТ.</span></div>
+            <div class="res-line"><span>ВЕС 1 ШТ:</span> <span><span id="c_res1">0.000</span> КГ</span></div>
+        </div>
+        <button class="back-btn" onclick="showScreen('menuScreen')">← Назад в меню</button>
+    </div>
+
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    tg.expand(); // Развернуть на весь экран
+    tg.expand();
 
-    const btn = document.getElementById('mainBtn');
-    
-    btn.onclick = function() {
-        const d = parseFloat(document.getElementById('d').value.replace(',', '.'));
-        const l = parseFloat(document.getElementById('l').value.replace(',', '.'));
-        const n = parseFloat(document.getElementById('n').value.replace(',', '.'));
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
 
-        if (d > 0 && l > 0 && n > 0) {
-            // Плотность стали 7850 кг/м3
-            const radiusM = (d / 2) / 1000;
-            const lengthM = l / 1000;
-            const weightOne = Math.PI * Math.pow(radiusM, 2) * lengthM * 7850;
-            
-            document.getElementById('r1').innerText = weightOne.toFixed(3);
-            document.getElementById('rn').innerText = (weightOne * n).toFixed(3);
-            document.getElementById('resBlock').style.display = 'block';
-            
-            // Легкая вибрация при расчете (фишка TG)
+    const DENSITY = 7850; // Сталь кг/м3
+
+    function getSingleWeight(d, l) {
+        return Math.PI * Math.pow((d/2000), 2) * (l/1000) * DENSITY;
+    }
+
+    function calcWeight() {
+        const d = parseFloat(document.getElementById('w_d').value);
+        const l = parseFloat(document.getElementById('w_l').value);
+        const n = parseFloat(document.getElementById('w_n').value);
+        if(d>0 && l>0 && n>0) {
+            const w1 = getSingleWeight(d, l);
+            document.getElementById('w_res1').innerText = w1.toFixed(3);
+            document.getElementById('w_resN').innerText = (w1 * n).toFixed(3);
             tg.HapticFeedback.impactOccurred('medium');
-        } else {
-            tg.showAlert("Пожалуйста, заполните все поля корректно");
         }
-    };
-</script>
+    }
 
+    function calcCount() {
+        const d = parseFloat(document.getElementById('c_d').value);
+        const l = parseFloat(document.getElementById('c_l').value);
+        const targetW = parseFloat(document.getElementById('c_w').value);
+        if(d>0 && l>0 && targetW>0) {
+            const w1 = getSingleWeight(d, l);
+            const count = targetW / w1;
+            document.getElementById('c_res1').innerText = w1.toFixed(3);
+            document.getElementById('c_resN').innerText = Math.round(count);
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+    }
+</script>
 </body>
 </html>
